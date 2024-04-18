@@ -17,12 +17,12 @@ public class RolePermissions {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="role_permission_role")
-    private RolesDef roles;
+    private RolesDef rolesDef;
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="role_permission_permissions")
-    private PermissionsDef permission;
+    private PermissionsDef permissionsDef;
 
 
     @Column(name="role_permission_alias")

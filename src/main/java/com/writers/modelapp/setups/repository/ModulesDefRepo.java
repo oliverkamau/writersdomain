@@ -15,4 +15,7 @@ public interface ModulesDefRepo extends JpaRepository<ModulesDef, Long> {
 
     @Query("SELECT s FROM ModulesDef s")
     List<ModulesDef> getModules(PageRequest request);
+
+    @Query("SELECT s FROM ModulesDef s where s.moduleAlias = :id")
+    List<ModulesDef> getModule(String id);
 }

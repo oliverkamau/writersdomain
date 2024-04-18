@@ -20,6 +20,9 @@ public class RolesDef implements Serializable{
     @Column(name="role_name")
     private String roleName;
 
+    @Column(name="role_desc")
+    private String roleDesc;
+
     @Column(name="role_alias")
     private String roleAlias;
 

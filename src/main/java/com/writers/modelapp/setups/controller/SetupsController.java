@@ -36,9 +36,59 @@ public class SetupsController {
 
     }
 
-    @GetMapping("getModules")
+    @PostMapping("getModules")
     public DataTableResponse getModules(@RequestBody DataTableRequest dataTableRequest){
 
         return setupsService.getModules(dataTableRequest);
     }
+    @PostMapping("getModule")
+    public DataTableResponse getModule(@RequestParam DataTableRequest dataTableRequest, @RequestParam String id){
+
+        return setupsService.getModule(dataTableRequest,id);
+    }
+
+    @PostMapping("/createPermission")
+    public JSONObject createPermission(@RequestBody JSONObject permissionRequest) throws Exception {
+        log.info("Incoming Create Permission Request {}", permissionRequest);
+        return setupsService.createPermission(permissionRequest);
+
+    }
+
+    @PostMapping("getPermissions")
+    public DataTableResponse getPermissions(@RequestBody DataTableRequest dataTableRequest){
+
+        return setupsService.getPermissions(dataTableRequest);
+    }
+    @PostMapping("getModule")
+    public DataTableResponse getPermission(@RequestParam DataTableRequest dataTableRequest, @RequestParam String id){
+
+        return setupsService.getPermission(dataTableRequest,id);
+    }
+
+    @PostMapping("/createRoles")
+    public JSONObject createRoles(@RequestBody JSONObject roleRequest) throws Exception {
+        log.info("Incoming Create Role Request {}", roleRequest);
+        return setupsService.createRoles(roleRequest);
+
+    }
+
+    @PostMapping("getRoles")
+    public DataTableResponse getRoles(@RequestBody DataTableRequest dataTableRequest){
+
+        return setupsService.getRoles(dataTableRequest);
+    }
+    @PostMapping("getRole")
+    public DataTableResponse getRole(@RequestParam DataTableRequest dataTableRequest, @RequestParam String id){
+
+        return setupsService.getRole(dataTableRequest,id);
+    }
+
+    @PostMapping("/createRolePermissions")
+    public JSONObject createRolePermissions(@RequestBody JSONObject rolePermissionRequest) throws Exception {
+        log.info("Incoming Create Role Permission Request {}", rolePermissionRequest);
+        return setupsService.createRolePermissions(rolePermissionRequest);
+
+    }
+
+
 }

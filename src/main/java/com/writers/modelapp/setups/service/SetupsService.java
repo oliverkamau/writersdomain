@@ -9,4 +9,20 @@ public interface SetupsService {
     JSONObject createModule(JSONObject moduleRequest) throws BadRequestException;
 
     DataTableResponse getModules(DataTableRequest dataTableRequest);
+
+    DataTableResponse getModule(DataTableRequest dataTableRequest, String id);
+
+    JSONObject createPermission(JSONObject permissionRequest) throws BadRequestException;
+
+    DataTableResponse getPermissions(DataTableRequest dataTableRequest);
+
+    DataTableResponse getPermission(DataTableRequest dataTableRequest, String id);
+
+    JSONObject createRoles(JSONObject roleRequest) throws BadRequestException;
+
+    DataTableResponse getRoles(DataTableRequest dataTableRequest);
+
+    DataTableResponse getRole(DataTableRequest dataTableRequest, String id);
+
+    JSONObject createRolePermissions(JSONObject rolePermissionRequest) throws BadRequestException;
 }
