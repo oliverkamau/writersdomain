@@ -19,7 +19,7 @@ public class UserRole implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name="user_role_role")
-	private RolesDef roles;
+	private RolesDef rolesDef;
 
 	@ManyToOne
 	@JoinColumn(name="user_role_user")

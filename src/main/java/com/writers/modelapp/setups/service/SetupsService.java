@@ -5,6 +5,9 @@ import com.writers.modelapp.exception.BadRequestException;
 import com.writers.modelapp.utils.DataTableRequest;
 import com.writers.modelapp.utils.DataTableResponse;
 
+import java.util.List;
+import java.util.Set;
+
 public interface SetupsService {
     JSONObject createModule(JSONObject moduleRequest) throws BadRequestException;
 
@@ -25,4 +28,16 @@ public interface SetupsService {
     DataTableResponse getRole(DataTableRequest dataTableRequest, String id);
 
     JSONObject createRolePermissions(JSONObject rolePermissionRequest) throws BadRequestException;
+
+    DataTableResponse getRolePermissions(DataTableRequest dataTableRequest);
+
+    DataTableResponse getRolePermission(DataTableRequest dataTableRequest, String id);
+
+    JSONObject createUserRoles(JSONObject roleRequest) throws BadRequestException;
+
+    Set<JSONObject> getAssignedRoles(JSONObject roleRequest) throws BadRequestException;
+
+    JSONObject removeUserRoles(JSONObject roleRequest) throws BadRequestException;
+
+    Set<JSONObject> getUnAssignedRoles(JSONObject roleRequest) throws BadRequestException;
 }

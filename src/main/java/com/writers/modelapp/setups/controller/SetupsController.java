@@ -16,6 +16,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Set;
+
 @RestController
 @RequestMapping("/api/setups")
 @Slf4j
@@ -89,6 +92,40 @@ public class SetupsController {
         return setupsService.createRolePermissions(rolePermissionRequest);
 
     }
+    @PostMapping("getRolePermissions")
+    public DataTableResponse getRolePermissions(@RequestBody DataTableRequest dataTableRequest){
 
+        return setupsService.getRolePermissions(dataTableRequest);
+    }
+    @PostMapping("getRolePermission")
+    public DataTableResponse getRolePermission(@RequestParam DataTableRequest dataTableRequest, @RequestParam String id){
+
+        return setupsService.getRolePermission(dataTableRequest,id);
+    }
+    @PostMapping("/createUserRoles")
+    public JSONObject createUserRoles(@RequestBody JSONObject roleRequest) throws Exception {
+        log.info("Incoming Create User Role Request {}", roleRequest);
+        return setupsService.createUserRoles(roleRequest);
+
+    }
+    @PostMapping("/removeUserRoles")
+    public JSONObject removeUserRoles(@RequestBody JSONObject roleRequest) throws Exception {
+        log.info("Incoming Remove Role Request {}", roleRequest);
+        return setupsService.removeUserRoles(roleRequest);
+
+    }
+
+    @PostMapping("/getUnAssignedRoles")
+    public Set<JSONObject> getUnAssignedRoles(@RequestBody JSONObject roleRequest) throws Exception {
+        log.info("Incoming Create User UnAssigned Roles Request {}", roleRequest);
+        return setupsService.getUnAssignedRoles(roleRequest);
+
+    }
+    @PostMapping("/getAssignedRoles")
+    public Set<JSONObject> getAssignedRoles(@RequestBody JSONObject roleRequest) throws Exception {
+        log.info("Incoming Create User Assigned Roles Request {}", roleRequest);
+        return setupsService.getAssignedRoles(roleRequest);
+
+    }
 
 }

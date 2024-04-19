@@ -2,14 +2,8 @@ package com.writers.modelapp.setups.service.impl;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.writers.modelapp.exception.BadRequestException;
-import com.writers.modelapp.setups.entity.ModulesDef;
-import com.writers.modelapp.setups.entity.PermissionsDef;
-import com.writers.modelapp.setups.entity.RolePermissions;
-import com.writers.modelapp.setups.entity.RolesDef;
-import com.writers.modelapp.setups.repository.ModulesDefRepo;
-import com.writers.modelapp.setups.repository.PermissionsDefRepo;
-import com.writers.modelapp.setups.repository.RolePermissionsRepo;
-import com.writers.modelapp.setups.repository.RolesDefRepo;
+import com.writers.modelapp.setups.entity.*;
+import com.writers.modelapp.setups.repository.*;
 import com.writers.modelapp.setups.service.SetupsService;
 import com.writers.modelapp.utils.DataTableRequest;
 import com.writers.modelapp.utils.DataTableResponse;
@@ -19,7 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class SetupsServiceImpl implements SetupsService {
@@ -34,16 +30,120 @@ public class SetupsServiceImpl implements SetupsService {
 
     private final RolePermissionsRepo rolePermissionsRepo;
 
-    public SetupsServiceImpl(ModulesDefRepo modulesDefRepo, RandomUtils randomUtils, PermissionsDefRepo permissionsDefRepo, RolesDefRepo rolesDefRepo, RolePermissionsRepo rolePermissionsRepo) {
+    private final UserRepo userRepo;
+
+    private final UseRoleRepo useRoleRepo;
+
+    public SetupsServiceImpl(ModulesDefRepo modulesDefRepo, RandomUtils randomUtils, PermissionsDefRepo permissionsDefRepo, RolesDefRepo rolesDefRepo, RolePermissionsRepo rolePermissionsRepo, UserRepo userRepo, UseRoleRepo useRoleRepo) {
         this.modulesDefRepo = modulesDefRepo;
         this.randomUtils = randomUtils;
         this.permissionsDefRepo = permissionsDefRepo;
         this.rolesDefRepo = rolesDefRepo;
         this.rolePermissionsRepo = rolePermissionsRepo;
+        this.userRepo = userRepo;
+        this.useRoleRepo = useRoleRepo;
+    }
+
+    @Override
+    public Set<JSONObject> getUnAssignedRoles(JSONObject roleRequest) throws BadRequestException {
+        if(StringUtils.isEmpty(roleRequest.getString("userId")))
+            throw new BadRequestException("User is required to remove role");
+        Users users = userRepo.findByUniqueRef(roleRequest.getString("userId"));
+        if(users==null)
+            throw new BadRequestException("Invalid User");
+
+        UserRole userRole =useRoleRepo.findBy
+    }
+
+    @Override
+    public Set<JSONObject> getAssignedRoles(JSONObject roleRequest) throws BadRequestException {
+        if(StringUtils.isEmpty(roleRequest.getString("userId")))
+            throw new BadRequestException("User is required to remove role");
+        Users users = userRepo.findByUniqueRef(roleRequest.getString("userId"));
+        if(users==null)
+            throw new BadRequestException("Invalid User");
+
+        List<UserRole> userRoles = useRoleRepo.findByUsers(users);
+        Set<JSONObject> objects = new HashSet<>();
+        for(UserRole u: userRoles){
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("roleName", u.getRolesDef().getRoleName());
+            jsonObject.put("roleDesc", u.getRolesDef().getRoleDesc());
+            jsonObject.put("roleCode", u.getRolesDef().getRoleAlias());
+            objects.add(jsonObject);
+        }
+
+        return objects;
+    }
+
+    @Override
+    public JSONObject removeUserRoles(JSONObject roleRequest) throws BadRequestException {
+        String id = "";
+        if(StringUtils.isEmpty(roleRequest.getString("userId")))
+            throw new BadRequestException("User is required to remove role");
+        Users users = userRepo.findByUniqueRef(roleRequest.getString("userId"));
+        if(users==null)
+            throw new BadRequestException("Invalid User");
+        RolesDef rolesDef = rolesDefRepo.findByRoleAlias(roleRequest.getString("role"));
+        if(rolesDef==null)
+            throw new BadRequestException("Invalid Role");
+
+
+        UserRole userRole = useRoleRepo.findByUsersAndRolesDef(users, rolesDef);
+        if (userRole == null) {
+            throw new BadRequestException("The User Role doesn't Exist");
+
+        } else {
+
+            useRoleRepo.delete(userRole);
+        }
+        JSONObject response = new JSONObject();
+
+
+        response.put("status","200");
+        response.put("message","User Role Removed Successfully");
+        response.put("id",id);
+        return response;
+    }
+
+    @Override
+    public JSONObject createUserRoles(JSONObject roleRequest) throws BadRequestException {
+
+        String id = "";
+        if(StringUtils.isEmpty(roleRequest.getString("userId")))
+            throw new BadRequestException("User is required to create role");
+        Users users = userRepo.findByUniqueRef(roleRequest.getString("userId"));
+        if(users==null)
+            throw new BadRequestException("Invalid User");
+        RolesDef rolesDef = rolesDefRepo.findByRoleAlias(roleRequest.getString("role"));
+        if(rolesDef==null)
+            throw new BadRequestException("Invalid Role");
+
+
+            UserRole userRole = useRoleRepo.findByUsersAndRolesDef(users, rolesDef);
+            if (userRole == null) {
+                userRole = new UserRole();
+                userRole.setUserRoleAlias(randomUtils.generateID(18));
+                userRole.setRolesDef(rolesDef);
+                userRole.setUsers(users);
+                id = userRole.getUserRoleAlias();
+                useRoleRepo.save(userRole);
+            } else {
+                throw new BadRequestException("The User Role already Exists");
+            }
+        JSONObject response = new JSONObject();
+
+
+        response.put("status","200");
+        response.put("message","User Role Created/Updated Successfully");
+        response.put("id",id);
+        return response;
     }
 
     @Override
     public JSONObject createRolePermissions(JSONObject rolePermissionRequest) throws BadRequestException {
+
+        String id = rolePermissionRequest.getString("rolePermissionCode");
 
         RolesDef rolesDef = rolesDefRepo.findByRoleAlias(rolePermissionRequest.getString("role"));
         if(rolesDef==null)
@@ -52,24 +152,34 @@ public class SetupsServiceImpl implements SetupsService {
         if(permissionsDef==null)
             throw new BadRequestException("Invalid Permission");
 
-        RolePermissions rolePermissions = rolePermissionsRepo.findByRolesDefAndPermissionsDef(rolesDef,permissionsDef);
-        if(rolePermissions == null){
-            rolePermissions = new RolePermissions();
-            rolePermissions.setRolePermissionAlias(randomUtils.generateID(18));
-            rolePermissions.setPermissionsDef(permissionsDef);
-            rolePermissions.setRolesDef(rolesDef);
-            rolePermissionsRepo.save(rolePermissions);
-            }
-            else{
+        if(StringUtils.isEmpty(id)) {
+
+            RolePermissions rolePermissions = rolePermissionsRepo.findByRolesDefAndPermissionsDef(rolesDef, permissionsDef);
+            if (rolePermissions == null) {
+                rolePermissions = new RolePermissions();
+                rolePermissions.setRolePermissionAlias(randomUtils.generateID(18));
+                rolePermissions.setPermissionsDef(permissionsDef);
+                rolePermissions.setRolesDef(rolesDef);
+                id = rolePermissions.getRolePermissionAlias();
+                rolePermissionsRepo.save(rolePermissions);
+            } else {
                 throw new BadRequestException("The Role Permission already Exists");
             }
+        }else{
+            RolePermissions rolePermissions = rolePermissionsRepo.findByRolePermissionAlias(id);
 
+                rolePermissions.setRolePermissionAlias(randomUtils.generateID(18));
+                rolePermissions.setPermissionsDef(permissionsDef);
+                rolePermissions.setRolesDef(rolesDef);
+                rolePermissionsRepo.save(rolePermissions);
+
+        }
         JSONObject response = new JSONObject();
 
 
         response.put("status","200");
         response.put("message","Role Permission Created/Updated Successfully");
-        response.put("id",rolePermissions.getRolePermissionAlias());
+        response.put("id",id);
         return response;
     }
 
@@ -111,6 +221,13 @@ public class SetupsServiceImpl implements SetupsService {
 
     @Override
     public JSONObject createPermission(JSONObject permissionRequest) throws BadRequestException {
+
+        if(StringUtils.isEmpty(permissionRequest.getString("module")))
+            throw new BadRequestException("Module for permission is required");
+        ModulesDef modulesDef = modulesDefRepo.findByModuleAlias(permissionRequest.getString("module"));
+        if(modulesDef==null)
+            throw new BadRequestException("Invalid module provided");
+
         String id = permissionRequest.getString("permissionCode");
 
         if(StringUtils.isEmpty(id)){
@@ -121,6 +238,7 @@ public class SetupsServiceImpl implements SetupsService {
                 permissionsDef.setPermissionAlias(randomUtils.generateID(18));
                 permissionsDef.setPermissionDesc(permissionRequest.getString("permissionDesc"));
                 permissionsDef.setPermissionName(permissionRequest.getString("permissionName"));
+                permissionsDef.setModule(modulesDef);
                 id = permissionsDef.getPermissionAlias();
                 permissionsDefRepo.save(permissionsDef);
             }
@@ -132,6 +250,7 @@ public class SetupsServiceImpl implements SetupsService {
         else {
             PermissionsDef permissionsDef = permissionsDefRepo.findByPermissionAlias(id);
             permissionsDef.setPermissionDesc(permissionRequest.getString("permissionDesc"));
+            permissionsDef.setModule(modulesDef);
             permissionsDef.setPermissionName(permissionRequest.getString("permissionName"));
             permissionsDefRepo.save(permissionsDef);
         }
@@ -241,6 +360,9 @@ public class SetupsServiceImpl implements SetupsService {
                 jsonObject.put("permissionName", permissionsDef.getPermissionName());
                 jsonObject.put("permissionDesc", permissionsDef.getPermissionDesc());
                 jsonObject.put("permissionCode", permissionsDef.getPermissionAlias());
+                jsonObject.put("moduleName", permissionsDef.getModule().getModuleName());
+                jsonObject.put("moduleId", permissionsDef.getModule().getModuleAlias());
+
                 defs.add(jsonObject);
             }
         }
@@ -264,6 +386,8 @@ public class SetupsServiceImpl implements SetupsService {
                 jsonObject.put("permissionName", permissionsDef.getPermissionName());
                 jsonObject.put("permissionDesc", permissionsDef.getPermissionDesc());
                 jsonObject.put("permissionCode", permissionsDef.getPermissionAlias());
+                jsonObject.put("moduleName", permissionsDef.getModule().getModuleName());
+                jsonObject.put("moduleId", permissionsDef.getModule().getModuleAlias());
                 defs.add(jsonObject);
             }
         }
@@ -316,6 +440,60 @@ public class SetupsServiceImpl implements SetupsService {
         dataTableResponse.setData(defs);
         dataTableResponse.setPageNumber(pageNumber);
         dataTableResponse.setSize(roles.size());
+
+        return dataTableResponse;
+    }
+
+    @Override
+    public DataTableResponse getRolePermissions(DataTableRequest dataTableRequest) {
+        int size = dataTableRequest.getPageSize();
+        int pageNumber = dataTableRequest.getPageNumber();
+        List<RolePermissions> rolePermissions = rolePermissionsRepo.getRolePermissions(PageRequest.of(pageNumber,size));
+        List<JSONObject> defs= new ArrayList<>();
+        if(!rolePermissions.isEmpty()){
+            for(RolePermissions rp: rolePermissions) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("rolePermissionCode", rp.getRolePermissionAlias());
+                jsonObject.put("roleName", rp.getRolesDef().getRoleName());
+                jsonObject.put("roleDesc", rp.getRolesDef().getRoleDesc());
+                jsonObject.put("roleCode", rp.getRolesDef().getRoleAlias());
+                jsonObject.put("permissionName", rp.getPermissionsDef().getPermissionName());
+                jsonObject.put("permissionDesc", rp.getPermissionsDef().getPermissionDesc());
+                jsonObject.put("permissionCode", rp.getPermissionsDef().getPermissionAlias());
+                defs.add(jsonObject);
+            }
+        }
+        DataTableResponse dataTableResponse = new DataTableResponse();
+        dataTableResponse.setData(defs);
+        dataTableResponse.setPageNumber(pageNumber);
+        dataTableResponse.setSize(rolePermissions.size());
+
+        return dataTableResponse;
+    }
+
+    @Override
+    public DataTableResponse getRolePermission(DataTableRequest dataTableRequest, String id) {
+        int size = dataTableRequest.getPageSize();
+        int pageNumber = dataTableRequest.getPageNumber();
+        List<RolePermissions> rolePermissions = rolePermissionsRepo.getRolePermission(id);
+        List<JSONObject> defs= new ArrayList<>();
+        if(!rolePermissions.isEmpty()){
+            for(RolePermissions rp: rolePermissions) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("rolePermissionCode", rp.getRolePermissionAlias());
+                jsonObject.put("roleName", rp.getRolesDef().getRoleName());
+                jsonObject.put("roleDesc", rp.getRolesDef().getRoleDesc());
+                jsonObject.put("roleCode", rp.getRolesDef().getRoleAlias());
+                jsonObject.put("permissionName", rp.getPermissionsDef().getPermissionName());
+                jsonObject.put("permissionDesc", rp.getPermissionsDef().getPermissionDesc());
+                jsonObject.put("permissionCode", rp.getPermissionsDef().getPermissionAlias());
+                defs.add(jsonObject);
+            }
+        }
+        DataTableResponse dataTableResponse = new DataTableResponse();
+        dataTableResponse.setData(defs);
+        dataTableResponse.setPageNumber(pageNumber);
+        dataTableResponse.setSize(rolePermissions.size());
 
         return dataTableResponse;
     }
