@@ -17,4 +17,7 @@ public interface RolesDefRepo extends JpaRepository<RolesDef, Long> {
 
     @Query("SELECT r FROM RolesDef r where r.roleAlias = :id")
     List<RolesDef> getRole(PageRequest of, String id);
+
+    @Query("select r from RolesDef r where  r.roleCode NOT IN(select s.rolesDef.roleCode from UserRole s where s.users.uniqueRef = :userId)")
+    List<RolesDef> getUnassogenedRoles(String userId);
 }

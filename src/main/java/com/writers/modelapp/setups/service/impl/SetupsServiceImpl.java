@@ -10,6 +10,7 @@ import com.writers.modelapp.utils.DataTableResponse;
 import com.writers.modelapp.utils.RandomUtils;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,7 +35,9 @@ public class SetupsServiceImpl implements SetupsService {
 
     private final UseRoleRepo useRoleRepo;
 
-    public SetupsServiceImpl(ModulesDefRepo modulesDefRepo, RandomUtils randomUtils, PermissionsDefRepo permissionsDefRepo, RolesDefRepo rolesDefRepo, RolePermissionsRepo rolePermissionsRepo, UserRepo userRepo, UseRoleRepo useRoleRepo) {
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    public SetupsServiceImpl(ModulesDefRepo modulesDefRepo, RandomUtils randomUtils, PermissionsDefRepo permissionsDefRepo, RolesDefRepo rolesDefRepo, RolePermissionsRepo rolePermissionsRepo, UserRepo userRepo, UseRoleRepo useRoleRepo, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.modulesDefRepo = modulesDefRepo;
         this.randomUtils = randomUtils;
         this.permissionsDefRepo = permissionsDefRepo;
@@ -42,6 +45,7 @@ public class SetupsServiceImpl implements SetupsService {
         this.rolePermissionsRepo = rolePermissionsRepo;
         this.userRepo = userRepo;
         this.useRoleRepo = useRoleRepo;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @Override
@@ -52,7 +56,17 @@ public class SetupsServiceImpl implements SetupsService {
         if(users==null)
             throw new BadRequestException("Invalid User");
 
-        UserRole userRole =useRoleRepo.findBy
+        List<RolesDef> rolesDefs = rolesDefRepo.getUnassogenedRoles(users.getUniqueRef());
+        Set<JSONObject> objects = new HashSet<>();
+        for(RolesDef u: rolesDefs){
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("roleName", u.getRoleName());
+            jsonObject.put("roleDesc", u.getRoleDesc());
+            jsonObject.put("roleCode", u.getRoleAlias());
+            objects.add(jsonObject);
+        }
+
+        return objects;
     }
 
     @Override
@@ -136,6 +150,46 @@ public class SetupsServiceImpl implements SetupsService {
 
         response.put("status","200");
         response.put("message","User Role Created/Updated Successfully");
+        response.put("id",id);
+        return response;
+    }
+
+    @Override
+    public JSONObject createUsers(JSONObject userRequest) throws BadRequestException {
+        String id = userRequest.getString("userId");
+
+        if(StringUtils.isEmpty(id)){
+            Users def = userRepo.findByUsernameIgnoreCase(userRequest.getString("username"));
+            if(def==null) {
+                Users users = new Users();
+                users.setEmail(userRequest.getString("email"));
+                users.setEnabled(userRequest.getString("enabled"));
+                users.setName(userRequest.getString("name"));
+                users.setPassword(bCryptPasswordEncoder.encode(userRequest.getString("password")));
+                users.setPhoneNumber(userRequest.getString("phoneNumber"));
+                users.setUsername(userRequest.getString("username"));
+                users.setUniqueRef(randomUtils.generateID(18));
+                userRepo.save(users);
+            }
+            else{
+                throw new BadRequestException("The Username provided already Exists");
+            }
+
+        }
+        else {
+            Users users = userRepo.findByUniqueRef(id);
+            users.setEmail(userRequest.getString("email"));
+            users.setEnabled(userRequest.getString("enabled"));
+            users.setName(userRequest.getString("name"));
+            users.setPhoneNumber(userRequest.getString("phoneNumber"));
+            userRepo.save(users);
+        }
+
+        JSONObject response = new JSONObject();
+
+
+        response.put("status","200");
+        response.put("message","User Created/Updated Successfully");
         response.put("id",id);
         return response;
     }
@@ -323,7 +377,57 @@ public class SetupsServiceImpl implements SetupsService {
         return dataTableResponse;
     }
 
+    @Override
+    public DataTableResponse getActiveUsers(DataTableRequest dataTableRequest) {
+        int size = dataTableRequest.getPageSize();
+        int pageNumber = dataTableRequest.getPageNumber();
+        List<Users> users = userRepo.getActiveUsers(PageRequest.of(pageNumber,size),"1");
+        List<JSONObject> defs= new ArrayList<>();
+        if(!users.isEmpty()){
+            for(Users u: users) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("userId", u.getUniqueRef());
+                jsonObject.put("username", u.getUsername());
+                jsonObject.put("name", u.getName());
+                jsonObject.put("email", u.getEmail());
+                jsonObject.put("phoneNumber", u.getPhoneNumber());
+                jsonObject.put("status", "Active");
+                defs.add(jsonObject);
+            }
+        }
+        DataTableResponse dataTableResponse = new DataTableResponse();
+        dataTableResponse.setData(defs);
+        dataTableResponse.setPageNumber(pageNumber);
+        dataTableResponse.setSize(defs.size());
 
+        return dataTableResponse;
+    }
+
+    @Override
+    public DataTableResponse getInActiveUsers(DataTableRequest dataTableRequest) {
+        int size = dataTableRequest.getPageSize();
+        int pageNumber = dataTableRequest.getPageNumber();
+        List<Users> users = userRepo.getActiveUsers(PageRequest.of(pageNumber,size),"0");
+        List<JSONObject> defs= new ArrayList<>();
+        if(!users.isEmpty()){
+            for(Users u: users) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("userId", u.getUniqueRef());
+                jsonObject.put("username", u.getUsername());
+                jsonObject.put("name", u.getName());
+                jsonObject.put("email", u.getEmail());
+                jsonObject.put("phoneNumber", u.getPhoneNumber());
+                jsonObject.put("status", "Inactive");
+                defs.add(jsonObject);
+            }
+        }
+        DataTableResponse dataTableResponse = new DataTableResponse();
+        dataTableResponse.setData(defs);
+        dataTableResponse.setPageNumber(pageNumber);
+        dataTableResponse.setSize(defs.size());
+
+        return dataTableResponse;
+    }
 
     @Override
     public DataTableResponse getModules(DataTableRequest dataTableRequest) {

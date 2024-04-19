@@ -11,4 +11,6 @@ public interface UseRoleRepo extends JpaRepository<UserRole, Long> {
     UserRole findByUsersAndRolesDef(Users users, RolesDef rolesDef);
 
     List<UserRole> findByUsers(Users users);
+
+
 }

@@ -61,7 +61,7 @@ public class SystemUserDetails implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
             System.out.println(username);
-            Users user = userRepo.findByUsernameEqualsIgnoreCaseAndEnabled(username, "1");
+            Users user = userRepo.findByUsernameIgnoreCaseAndEnabled(username, "1");
 
             if (user == null) {
                 throw new UsernameNotFoundException("Invalid Username or Password");

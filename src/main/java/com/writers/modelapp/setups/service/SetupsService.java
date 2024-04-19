@@ -40,4 +40,10 @@ public interface SetupsService {
     JSONObject removeUserRoles(JSONObject roleRequest) throws BadRequestException;
 
     Set<JSONObject> getUnAssignedRoles(JSONObject roleRequest) throws BadRequestException;
+
+    JSONObject createUsers(JSONObject userRequest) throws BadRequestException;
+
+    DataTableResponse getActiveUsers(DataTableRequest dataTableRequest);
+
+    DataTableResponse getInActiveUsers(DataTableRequest dataTableRequest);
 }

@@ -127,5 +127,24 @@ public class SetupsController {
         return setupsService.getAssignedRoles(roleRequest);
 
     }
+    @PostMapping("/createUser")
+    public JSONObject createUser(@RequestBody JSONObject userRequest) throws Exception {
+        log.info("Incoming Create User Request {}", userRequest);
+        return setupsService.createUsers(userRequest);
+
+    }
+    @PostMapping("/getActiveUsers")
+    public DataTableResponse getActiveUsers(@RequestBody DataTableRequest dataTableRequest) throws Exception {
+        log.info("Incoming Active User Request {}", dataTableRequest);
+        return setupsService.getActiveUsers(dataTableRequest);
+
+    }
+    @PostMapping("/getInActiveUsers")
+    public DataTableResponse getInActiveUsers(@RequestBody DataTableRequest dataTableRequest) throws Exception {
+        log.info("Incoming Inactive User Request {}", dataTableRequest);
+        return setupsService.getInActiveUsers(dataTableRequest);
+
+    }
+
 
 }
