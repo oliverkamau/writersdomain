@@ -39,7 +39,7 @@ public class AuthController {
         } catch (BadCredentialsException e) {
             throw new Exception("Incorrect phone or password", e);
         }
-        Users user=userRepo.findByUsernameEqualsIgnoreCaseAndEnabled(authenticationRequest.getString("username"),"1");
+        Users user=userRepo.findByUsernameIgnoreCaseAndEnabled(authenticationRequest.getString("username"),"1");
         String otp = mySystemUserDetails.promptOTP(user);
         JSONObject response = new JSONObject();
         response.put("status","pending");
@@ -63,7 +63,7 @@ public class AuthController {
 
     @PostMapping("/validateotp")
     public JSONObject validateAuthenticationToken(@RequestBody JSONObject jsonObject) throws Exception {
-        Users user=userRepo.findByUsernameEqualsIgnoreCaseAndEnabled(jsonObject.getString("username"),"1");
+        Users user=userRepo.findByUsernameIgnoreCaseAndEnabled(jsonObject.getString("username"),"1");
         if(user==null)
             throw new BadCredentialsException("User Being validated doen't Exist");
         mySystemUserDetails.verifyOTP(user,jsonObject.getString("otp"));

@@ -1,1 +1,30 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: writers domain
+  datasource:
+    url: jdbc:sqlserver://localhost:1403;encrypt=true;trustServerCertificate=true;databaseName=stima_db
+    username: sa
+    password: Gabu@dev001
+
+  jpa:
+    database-platform: org.hibernate.dialect.SQLServerDialect
+    hibernate:
+      ddl-auto: update
+
+webclient:
+  timeout: 60000
+
+otp:
+  timeout: 300000
+
+custommail:
+  host: smtp.gmail.com
+  port: 587
+  username: kamaugaby13@gmail.com
+  alias: WriterApp
+  password: Gabu@dev001
+  smtpauth: YES
+
 

@@ -47,14 +47,11 @@ public class SystemUserDetails implements UserDetailsService {
     private boolean smtpAuth;
 
     private final UserRepo userRepo;
-    private final BCryptPasswordEncoder encoder;
-    private final WebClient webClient;
 
 
-    public SystemUserDetails(UserRepo userRepo, BCryptPasswordEncoder encoder, WebClient webClient) {
+
+    public SystemUserDetails(UserRepo userRepo, BCryptPasswordEncoder encoder) {
         this.userRepo = userRepo;
-        this.encoder = encoder;
-        this.webClient = webClient;
     }
 
     @Override

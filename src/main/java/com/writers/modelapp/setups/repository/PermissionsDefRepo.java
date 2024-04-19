@@ -11,7 +11,7 @@ public interface PermissionsDefRepo extends JpaRepository<PermissionsDef, Long> 
     PermissionsDef findByPermissionNameIgnoreCase(String permissionName);
 
     PermissionsDef findByPermissionAlias(String id);
-
+    @Query("SELECT p FROM PermissionsDef p")
     List<PermissionsDef> getPermissions(PageRequest of);
 
     @Query("SELECT p FROM PermissionsDef p where p.permissionAlias = :id")

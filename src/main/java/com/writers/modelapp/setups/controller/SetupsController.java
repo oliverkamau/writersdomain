@@ -62,7 +62,7 @@ public class SetupsController {
 
         return setupsService.getPermissions(dataTableRequest);
     }
-    @PostMapping("getModule")
+    @PostMapping("getPermission")
     public DataTableResponse getPermission(@RequestParam DataTableRequest dataTableRequest, @RequestParam String id){
 
         return setupsService.getPermission(dataTableRequest,id);
