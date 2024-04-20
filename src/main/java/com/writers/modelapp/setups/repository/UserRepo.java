@@ -17,4 +17,6 @@ public interface UserRepo extends JpaRepository<Users, Long> {
 
     @Query("SELECT s FROM Users s where s.enabled = :status")
     List<Users> getActiveUsers(PageRequest of, String status);
+
+    long countByEnabled(String enabled);
 }

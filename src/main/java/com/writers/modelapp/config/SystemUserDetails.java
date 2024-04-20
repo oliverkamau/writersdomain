@@ -74,7 +74,7 @@ public class SystemUserDetails implements UserDetailsService {
     public String generateOTP() {
         Random random = new Random();
         int otp = 100000 + random.nextInt(900000);
-//        log.info("OTP CODE GENERATED IS --->"+otp);
+        log.info("OTP CODE GENERATED IS --->"+otp);
         return String.valueOf(otp);
     }
 

@@ -10,6 +10,7 @@ public class DataTableResponse {
 
     private int size;
     private int pageNumber;
+    private long totalRecords;
     private List<JSONObject> data;
 
 }

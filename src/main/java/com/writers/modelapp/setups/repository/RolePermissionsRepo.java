@@ -18,4 +18,5 @@ public interface RolePermissionsRepo extends JpaRepository<RolePermissions,Long>
     List<RolePermissions> getRolePermissions(PageRequest of);
     @Query("SELECT r FROM RolePermissions r where r.rolePermissionAlias = :id")
     List<RolePermissions> getRolePermission(String id);
+    List<RolePermissions> findByRolesDef(RolesDef rolesDef);
 }

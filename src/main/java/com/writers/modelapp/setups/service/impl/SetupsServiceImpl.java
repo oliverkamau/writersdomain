@@ -169,6 +169,7 @@ public class SetupsServiceImpl implements SetupsService {
                 users.setPhoneNumber(userRequest.getString("phoneNumber"));
                 users.setUsername(userRequest.getString("username"));
                 users.setUniqueRef(randomUtils.generateID(18));
+                id = users.getUniqueRef();
                 userRepo.save(users);
             }
             else{
@@ -372,6 +373,7 @@ public class SetupsServiceImpl implements SetupsService {
         DataTableResponse dataTableResponse = new DataTableResponse();
         dataTableResponse.setData(defs);
         dataTableResponse.setPageNumber(pageNumber);
+        dataTableResponse.setTotalRecords(1);
         dataTableResponse.setSize(modules.size());
 
         return dataTableResponse;
@@ -381,6 +383,7 @@ public class SetupsServiceImpl implements SetupsService {
     public DataTableResponse getActiveUsers(DataTableRequest dataTableRequest) {
         int size = dataTableRequest.getPageSize();
         int pageNumber = dataTableRequest.getPageNumber();
+        long totalRecords = userRepo.countByEnabled("1");
         List<Users> users = userRepo.getActiveUsers(PageRequest.of(pageNumber,size),"1");
         List<JSONObject> defs= new ArrayList<>();
         if(!users.isEmpty()){
@@ -398,6 +401,7 @@ public class SetupsServiceImpl implements SetupsService {
         DataTableResponse dataTableResponse = new DataTableResponse();
         dataTableResponse.setData(defs);
         dataTableResponse.setPageNumber(pageNumber);
+        dataTableResponse.setTotalRecords(totalRecords);
         dataTableResponse.setSize(defs.size());
 
         return dataTableResponse;
@@ -407,6 +411,7 @@ public class SetupsServiceImpl implements SetupsService {
     public DataTableResponse getInActiveUsers(DataTableRequest dataTableRequest) {
         int size = dataTableRequest.getPageSize();
         int pageNumber = dataTableRequest.getPageNumber();
+        long totalRecords = userRepo.countByEnabled("0");
         List<Users> users = userRepo.getActiveUsers(PageRequest.of(pageNumber,size),"0");
         List<JSONObject> defs= new ArrayList<>();
         if(!users.isEmpty()){
@@ -424,6 +429,7 @@ public class SetupsServiceImpl implements SetupsService {
         DataTableResponse dataTableResponse = new DataTableResponse();
         dataTableResponse.setData(defs);
         dataTableResponse.setPageNumber(pageNumber);
+        dataTableResponse.setTotalRecords(totalRecords);
         dataTableResponse.setSize(defs.size());
 
         return dataTableResponse;
@@ -433,6 +439,7 @@ public class SetupsServiceImpl implements SetupsService {
     public DataTableResponse getModules(DataTableRequest dataTableRequest) {
         int size = dataTableRequest.getPageSize();
         int pageNumber = dataTableRequest.getPageNumber();
+        long totalRecords = modulesDefRepo.count();
         List<ModulesDef> modules = modulesDefRepo.getModules(PageRequest.of(pageNumber,size));
         List<JSONObject> defs= new ArrayList<>();
         if(!modules.isEmpty()){
@@ -448,6 +455,7 @@ public class SetupsServiceImpl implements SetupsService {
         dataTableResponse.setData(defs);
         dataTableResponse.setPageNumber(pageNumber);
         dataTableResponse.setSize(modules.size());
+        dataTableResponse.setTotalRecords(totalRecords);
 
         return dataTableResponse;
     }
@@ -456,6 +464,7 @@ public class SetupsServiceImpl implements SetupsService {
     public DataTableResponse getPermissions(DataTableRequest dataTableRequest) {
         int size = dataTableRequest.getPageSize();
         int pageNumber = dataTableRequest.getPageNumber();
+        long totalRecords = permissionsDefRepo.count();
         List<PermissionsDef> permissions = permissionsDefRepo.getPermissions(PageRequest.of(pageNumber,size));
         List<JSONObject> defs= new ArrayList<>();
         if(!permissions.isEmpty()){
@@ -474,7 +483,7 @@ public class SetupsServiceImpl implements SetupsService {
         dataTableResponse.setData(defs);
         dataTableResponse.setPageNumber(pageNumber);
         dataTableResponse.setSize(permissions.size());
-
+        dataTableResponse.setTotalRecords(totalRecords);
         return dataTableResponse;
     }
 
@@ -499,6 +508,7 @@ public class SetupsServiceImpl implements SetupsService {
         dataTableResponse.setData(defs);
         dataTableResponse.setPageNumber(pageNumber);
         dataTableResponse.setSize(permissions.size());
+        dataTableResponse.setTotalRecords(1);
         return dataTableResponse;
     }
 
@@ -506,6 +516,7 @@ public class SetupsServiceImpl implements SetupsService {
     public DataTableResponse getRoles(DataTableRequest dataTableRequest) {
         int size = dataTableRequest.getPageSize();
         int pageNumber = dataTableRequest.getPageNumber();
+        long totalRecords = rolesDefRepo.count();
         List<RolesDef> roles = rolesDefRepo.getRoles(PageRequest.of(pageNumber,size));
         List<JSONObject> defs= new ArrayList<>();
         if(!roles.isEmpty()){
@@ -521,7 +532,7 @@ public class SetupsServiceImpl implements SetupsService {
         dataTableResponse.setData(defs);
         dataTableResponse.setPageNumber(pageNumber);
         dataTableResponse.setSize(roles.size());
-
+        dataTableResponse.setTotalRecords(totalRecords);
         return dataTableResponse;
     }
 
@@ -544,7 +555,7 @@ public class SetupsServiceImpl implements SetupsService {
         dataTableResponse.setData(defs);
         dataTableResponse.setPageNumber(pageNumber);
         dataTableResponse.setSize(roles.size());
-
+        dataTableResponse.setTotalRecords(1);
         return dataTableResponse;
     }
 
@@ -552,6 +563,7 @@ public class SetupsServiceImpl implements SetupsService {
     public DataTableResponse getRolePermissions(DataTableRequest dataTableRequest) {
         int size = dataTableRequest.getPageSize();
         int pageNumber = dataTableRequest.getPageNumber();
+        long totalRecords = rolePermissionsRepo.count();
         List<RolePermissions> rolePermissions = rolePermissionsRepo.getRolePermissions(PageRequest.of(pageNumber,size));
         List<JSONObject> defs= new ArrayList<>();
         if(!rolePermissions.isEmpty()){
@@ -570,6 +582,7 @@ public class SetupsServiceImpl implements SetupsService {
         DataTableResponse dataTableResponse = new DataTableResponse();
         dataTableResponse.setData(defs);
         dataTableResponse.setPageNumber(pageNumber);
+        dataTableResponse.setTotalRecords(totalRecords);
         dataTableResponse.setSize(rolePermissions.size());
 
         return dataTableResponse;
@@ -598,7 +611,7 @@ public class SetupsServiceImpl implements SetupsService {
         dataTableResponse.setData(defs);
         dataTableResponse.setPageNumber(pageNumber);
         dataTableResponse.setSize(rolePermissions.size());
-
+        dataTableResponse.setTotalRecords(1);
         return dataTableResponse;
     }
 }
